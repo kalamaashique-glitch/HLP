@@ -1,2 +1,0 @@
-# HLP
-Hacking Learning Path
