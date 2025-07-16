@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HLP-Login</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .auth-column {
+      background: #181818;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ff99;
+      padding: 30px 24px 24px 24px;
+      min-width: 300px;
+      max-width: 350px;
+      flex: 1 1 320px;
+    }
+    .auth-column h2 {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .auth-column form label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    .auth-column form input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: #222;
+      color: #fff;
+    }
+    .auth-column form button {
+      width: 100%;
+      padding: 10px;
+      background: #00ff99;
+      color: #181818;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .auth-message {
+      text-align: center;
+      margin-top: 10px;
+      color: #ff4444;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo"><img src="logo.jpeg" alt="HLP Logo" class="logo-img"><span class="logo-text">HLP<br><span class="logo-subtext glow-hacker">Hacking Learning Path</span></span></div>
+      <ul>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <h1 class="glow-hacker">Login or Create Account</h1>
+      <div class="auth-container">
+        <div class="auth-column">
+          <h2>Login</h2>
+          <form id="login-form" class="login-form">
+            <label for="login-email">Email ID</label>
+            <input type="email" id="login-email" name="login-email" required>
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="login-password" required>
+            <button type="submit">Login</button>
+          </form>
+          <div id="login-message" class="auth-message"></div>
+        </div>
+        <div class="auth-column">
+          <h2>Create Account</h2>
+          <form id="register-form" class="register-form">
+            <label for="register-email">Email ID</label>
+            <input type="email" id="register-email" name="register-email" required>
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" name="register-password" required>
+            <button type="submit">Create Account</button>
+          </form>
+          <div id="register-message" class="auth-message"></div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top: 32px;">
+        <div id="g_id_onload"
+             data-client_id="728067752026-gue4jcho8ga8h1eloseh1c1pvcmtrpek.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="onGoogleSignIn"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="filled_black"
+             data-text="continue_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
+        <div id="google-message" class="auth-message"></div>
+      </div>
+    </section>
+  </main>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    // Login logic
+    document.getElementById('login-form').onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      const msg = document.getElementById('login-message');
+      if (!email.endsWith('@gmail.com')) {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'Email ID is not valid';
+        return;
+      }
+      if (users[email]) {
+        if (users[email].password === password) {
+          msg.style.color = '#00ff99';
+          msg.textContent = 'Login successful! Redirecting...';
+          localStorage.setItem('currentUser', email);
+          setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        } else {
+          msg.style.color = '#ff4444';
+          msg.textContent = 'Incorrect password.';
+        }
+      } else {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'No account found with this email.';
+      }
+    };
+    // Registration logic
+    document.getElementById('register-form').onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('register-email').value.trim().toLowerCase();
+      const password = document.getElementById('register-password').value;
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      const msg = document.getElementById('register-message');
+      if (!email.endsWith('@gmail.com')) {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'Email ID is not valid';
+        return;
+      }
+      if (users[email]) {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'An account with this email already exists.';
+      } else {
+        users[email] = { password };
+        localStorage.setItem('users', JSON.stringify(users));
+        msg.style.color = '#00ff99';
+        msg.textContent = 'Account created! You are now logged in.';
+        localStorage.setItem('currentUser', email);
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      }
+    };
+    // Google Sign-In callback
+    function onGoogleSignIn(response) {
+      const msg = document.getElementById('google-message');
+      if (!response.credential) {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'Google sign-in failed or was cancelled.';
+        return;
+      }
+      // Decode JWT to get email
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      const email = payload.email;
+      if (!email || !email.endsWith('@gmail.com')) {
+        msg.style.color = '#ff4444';
+        msg.textContent = 'Only @gmail.com accounts are allowed.';
+        return;
+      }
+      // Store user in localStorage if not already present
+      let users = JSON.parse(localStorage.getItem('users') || '{}');
+      if (!users[email]) {
+        users[email] = { password: null, google: true };
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      localStorage.setItem('currentUser', email);
+      msg.style.color = '#00ff99';
+      msg.textContent = 'Google sign-in successful! Redirecting...';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+    }
+  </script>
+  <footer>
+    <p>&copy; 2024 HLP Hacking Learning Path. For educational purposes only.</p>
+    <p class="ceo-text">The CEO of the HLP is <span class="pop-text">KALAM AASHIQUE</span>, Who is a web developer and also a video editor.</p>
+    <p class="contact-text">If ther is any issue contact hus,<span class="contact-number">+91 8925459668</span>,ThankS for visiting <span class="pop-text">HPL</span></p>
+    </footer>
+</body>
+</html> 
